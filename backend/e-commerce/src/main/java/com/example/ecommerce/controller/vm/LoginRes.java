@@ -1,5 +1,6 @@
 package com.example.ecommerce.controller.vm;
 
+import com.example.ecommerce.dto.UserDto;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -9,8 +10,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class LoginRes {
-    @NotBlank(message = "login.message.required")
-    private String message;
+    @NotBlank
+    private UserDto user;
     @NotBlank(message = "login.token.required")
     private String token;
 }

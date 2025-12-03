@@ -1,7 +1,12 @@
 package com.example.ecommerce.config;
 
+import com.example.ecommerce.dto.UserDto;
 import com.example.ecommerce.helper.JwtToken;
+import com.example.ecommerce.mapper.UserMapper;
 import com.example.ecommerce.model.User;
+import com.example.ecommerce.repo.UserRepo;
+import com.example.ecommerce.service.AuthService;
+import com.example.ecommerce.service.UserService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.JwtParser;
@@ -19,12 +24,17 @@ public class JwtHandler {
     private final JwtBuilder jwtBuilder;
     private final JwtParser jwtParser;
     private final JwtToken jwtToken;
+    private final UserRepo userRepo;
+    private final UserMapper userMapper;
+
     @Autowired
-    public JwtHandler(JwtToken jwtToken) {
+    public JwtHandler(JwtToken jwtToken, UserRepo userRepo, UserMapper userMapper) {
         this.jwtToken=jwtToken;
         Key key= Keys.hmacShaKeyFor(jwtToken.getSecret_Key().getBytes(StandardCharsets.UTF_8));
         this.jwtBuilder= Jwts.builder().signWith(key);
         this.jwtParser= Jwts.parserBuilder().setSigningKey(key).build();
+        this.userRepo = userRepo;
+        this.userMapper = userMapper;
     }
 
     public String generateToken(User user) {
@@ -38,20 +48,28 @@ public class JwtHandler {
             .compact();
 
     };
-
-    public String validateToken(String token) {
+    public UserDto  validateToken(String token) {
      if (!jwtParser.isSigned(token)) {
          throw new RuntimeException("Invalid token");
      }
         Claims claims = jwtParser.parseClaimsJws(token).getBody();
-     String username = claims.getSubject();
-    Date issued =  claims.getIssuedAt();
-     Date expiration = claims.getExpiration();
-     Date now = new Date();
+        String username = claims.getSubject();
+        Date issued =  claims.getIssuedAt();
+        Date expiration = claims.getExpiration();
+        Date now = new Date();
          if (now.after(expiration)) {
-             throw new RuntimeException("Token expired");
+             throw new RuntimeException("token.expired");
          }
-     return username;
+        UserDto userDto =userMapper.userToUserDto(userRepo.findByUsername(username));
+         if (userDto.getUsername() == null) {
+                throw new RuntimeException("token.invalid");
+         }
+        boolean tokenValid = issued.before(new Date()) && expiration.after(new Date());
+        if (tokenValid) {
+            return userDto;
+        } else {
+            throw new RuntimeException("token.invalid");
+        }
 
     }
 

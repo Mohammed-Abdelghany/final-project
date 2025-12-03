@@ -144,6 +144,7 @@ public class ProductServiceImp implements ProductService {
                 .map(dto -> {
                     Product existing = productRepo.findById(dto.getId())
                             .orElseThrow(() -> new RuntimeException("Product not found"));
+
                     CategoryDto categoryDto = categoryServiceImp.findById(dto.getCategoryDto().getId());
                     productMapper.updateProductFromDto(dto, existing);
                     existing.setCategory(categoryMapper.toCategory(categoryDto));

@@ -10,10 +10,11 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping("/**") // كل ال endpoints
-                .allowedOrigins("http://localhost:4200", "https://myproductionfrontend.com") // dev + production
+        registry.addMapping("/**")
+                .allowedOrigins("http://localhost:4200", "https://myproductionfrontend.com")
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
+                .exposedHeaders("Authorization") // مهم للـ JWT
                 .allowCredentials(true);
     }
 }

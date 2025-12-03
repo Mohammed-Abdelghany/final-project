@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 
-@Entity
+@Entity(name = "users")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -18,7 +18,10 @@ public class User {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
     @NotNull
+
     private String username;
+    @NotNull
+    private String name;
     @NotNull
     private String password;
     private String spec;
@@ -30,7 +33,7 @@ public class User {
     private List<Product> products;
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
-            name = "user_roles",
+            name = "users_roles",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id")
     )
