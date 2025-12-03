@@ -1,0 +1,29 @@
+server:
+  port: 9090
+spring:
+#  security:
+#    user:
+#      name: moo
+#      password: moo123
+  application:
+    name: e-commerece
+  datasource:
+    url: jdbc:oracle:thin:@//localhost:1521/orclpdb
+    driver:-class-name: oracle.jdbc.OracleDriver
+    username: hr
+    password: hr
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+  messages:
+    basename: messages
+    encoding: UTF-8
+jwt:
+  secret_Key: kld##wsadklwk%efe%#3#%)!@_!@#!@()$()!@#$!@#%@#@!#@!#
+  duration: 24h  # 1 day in milliseconds
+upload:
+  dir: D:/Final-Project/uploads
+#token:
+#  secretKey: kld##wsadklwk%%#3#%)!@_!@#!@()$()!@#$!@#%@#@!#@!#
+#  duration: 24h  # 1 day in milliseconds
