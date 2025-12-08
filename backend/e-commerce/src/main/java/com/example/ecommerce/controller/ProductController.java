@@ -16,7 +16,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/products")
-
+@PreAuthorize("hasAllRoles('ADMIN','Chef','User')")
 public class ProductController {
     private final ProductService productService;
     @Autowired
@@ -55,7 +55,6 @@ public class ProductController {
 //    @PostMapping( consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
-    @PreAuthorize("hasAllRoles('ADMIN','Chef')")
     public ProductDto createProduct(@RequestPart("product") ProductDto productDto){
         return productService.createProduct(productDto);
     }

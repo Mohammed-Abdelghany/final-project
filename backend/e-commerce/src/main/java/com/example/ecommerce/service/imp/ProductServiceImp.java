@@ -7,6 +7,7 @@ import com.example.ecommerce.dto.ProductDto;
 //import com.example.ecommerce.helper.FileStorageHelper;
 import com.example.ecommerce.dto.UserDto;
 import com.example.ecommerce.helper.Pagination;
+import com.example.ecommerce.helper.UserAuthenticated;
 import com.example.ecommerce.mapper.CategoryMapper;
 import com.example.ecommerce.mapper.ProductMapper;
 //import com.example.ecommerce.model.Media;
@@ -100,16 +101,10 @@ public class ProductServiceImp implements ProductService {
 
     @Transactional
     public List<ProductDto> saveProducts(List<ProductDto> productsDto) {
-
-        // 1) Get authenticated user
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-
-        if (auth == null || !auth.isAuthenticated())
-            throw new RuntimeException("user.notfound");
-
-        if (!(auth.getPrincipal() instanceof UserDto userDto))
-            throw new RuntimeException("user.notfound");
-        if (!auth.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_Chef"))) {
+       UserDto userDto= UserAuthenticated.getUserDtoAuthenticated();
+        boolean isChef = userDto.getRoles().stream()
+                .anyMatch(r -> r.getCode().equals("ROLE_Chef"));
+        if (!isChef) {
             throw new RuntimeException("user.cannot.create.product");
         }
 

@@ -1,6 +1,7 @@
 package com.example.ecommerce.dto;
 
 import com.example.ecommerce.model.Role;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -26,4 +27,6 @@ public class UserDto {
     private String tweLink;
     private String instLink;
     private List<Role> roles;
+    @JsonIgnore
+    private List<ContactMessageDto> contactMessages;
 }

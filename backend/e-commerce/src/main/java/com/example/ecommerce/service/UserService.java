@@ -6,13 +6,14 @@ import com.example.ecommerce.controller.vm.LoginRes;
 import com.example.ecommerce.controller.vm.RegisterReq;
 import com.example.ecommerce.dto.UserDto;
 import com.example.ecommerce.model.User;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 
 public interface UserService {
 
-        List<UserDto> getAllUsers();
+        Page<UserDto> getAllChefs(int page, int size);
         UserDto getUserById(Long id);
           UserDto updateUser(UserDto  userDto);
         void deleteUser(Long id);
