@@ -54,7 +54,7 @@ public class AuthFilter extends OncePerRequestFilter {
 
             UsernamePasswordAuthenticationToken authenticationToken =
                     new UsernamePasswordAuthenticationToken(
-                            userDto.getUsername(),
+                            userDto,
                             null,
                             roles
                     );

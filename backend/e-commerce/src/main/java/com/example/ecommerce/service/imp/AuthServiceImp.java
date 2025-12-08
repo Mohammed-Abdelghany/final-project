@@ -54,7 +54,6 @@ public class AuthServiceImp implements AuthService {
             throw new RuntimeException("Username already exists");
         }
 
-        // 2. Create new User
         User user = new User();
         user.setName(userReq.getName());
 
@@ -67,15 +66,11 @@ public class AuthServiceImp implements AuthService {
             defaultRole.setCode("USER");
             defaultRole = roleRepo.save(defaultRole);
         }
-
-        // 4. Assign role
         user.setRoles(new ArrayList<>());
         user.getRoles().add(defaultRole);
 
-        // 5. Save user
         User savedUser = userRepo.save(user);
 
-        // 6. Return DTO
         return userMapper.userToUserDto(savedUser);
     }
 

@@ -9,7 +9,7 @@ import org.mapstruct.MappingTarget;
 
 import java.util.List;
 
-@Mapper(componentModel = "spring", uses = {CategoryMapper.class,MediaMapper.class} )
+@Mapper(componentModel = "spring", uses = {CategoryMapper.class} )
 
 public interface ProductMapper  {
 

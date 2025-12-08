@@ -1,32 +1,42 @@
 package com.example.ecommerce.controller;
 
+import com.example.ecommerce.controller.vm.PageResponse;
 import com.example.ecommerce.dto.ProductDto;
 import com.example.ecommerce.service.ProductService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
+//import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-import tools.jackson.databind.ObjectMapper;
 
-import java.io.IOException;
 import java.util.List;
 
 @RestController
 @RequestMapping("/products")
+
 public class ProductController {
     private final ProductService productService;
     @Autowired
     public ProductController(ProductService productService) {
         this.productService = productService;
     }
-    @GetMapping
-    public List<ProductDto> getProducts() {
-        return productService.getProducts();
+    @GetMapping("/{page}/{size}")
+    public PageResponse<ProductDto> getProducts(@PathVariable int page, @PathVariable int size) {
+        Page<ProductDto> pageProducts = productService.getProducts(page, size); // Page من Spring Data
+        return new PageResponse<>(
+                pageProducts.getContent(),
+                pageProducts.getNumber(),
+                pageProducts.getTotalPages(),
+                pageProducts.getTotalElements(),
+                pageProducts.getSize(),
+                pageProducts.isFirst(),
+                pageProducts.isLast()
+        );
     }
+
     @GetMapping("/{id}")
     public ProductDto getProduct(@Valid @PathVariable Long id) {
         return productService.getProduct(id);
@@ -42,22 +52,28 @@ public class ProductController {
         return productService.updateProducts(productsDto);
     }
 
-    @PostMapping( consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+//    @PostMapping( consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
-    public ProductDto createProduct(
-            @RequestPart("product") String productJson, // هنبعت JSON string
-            @RequestPart(name = "files", required = false) List<MultipartFile> imageFiles) throws IOException {
-
-        // تحويل JSON string لـ ProductDto
-        ObjectMapper objectMapper = new ObjectMapper();
-        ProductDto productDto = objectMapper.readValue(productJson, ProductDto.class);
-
-        return productService.createProduct(productDto, imageFiles);
+    @PostMapping
+    @PreAuthorize("hasAllRoles('ADMIN','Chef')")
+    public ProductDto createProduct(@RequestPart("product") ProductDto productDto){
+        return productService.createProduct(productDto);
     }
-
     @GetMapping("/category/{categoryId}")
-    public List<ProductDto> getProductsByCategoryId(@Valid @PathVariable Long categoryId){
-        return productService.getProductsByCategory(categoryId);
+    public PageResponse<ProductDto> getProductsByCategoryId(@Valid @PathVariable Long categoryId,
+                                                            @RequestParam int page,
+                                                            @RequestParam int size) {
+        Page<ProductDto> pageProducts = productService.getProductsByCategory(categoryId, page,size);
+            return new PageResponse<>(
+                    pageProducts.getContent(),
+                    pageProducts.getNumber(),
+                    pageProducts.getTotalPages(),
+                    pageProducts.getTotalElements(),
+                    pageProducts.getSize(),
+                    pageProducts.isFirst(),
+                    pageProducts.isLast()
+            );
+
     }
 
     @DeleteMapping("/{id}")
@@ -72,8 +88,18 @@ public class ProductController {
     }
 
     @GetMapping("/by-name-or-description/{text}")
-    public List<ProductDto> getProductsByNameOrDescription(@Valid @PathVariable String text) {
-        return productService.getProductByNameOrDescription(text);
+    public PageResponse<ProductDto> getProductsByNameOrDescription(@Valid @PathVariable String text,
+    @RequestParam int page, @RequestParam int size){
+        Page<ProductDto> productPage  = productService.getProductByNameOrDescription(text,page,size);
+return new PageResponse<>(
+        productPage.getContent(),
+        productPage.getNumber(),
+        productPage.getTotalPages(),
+        productPage.getTotalElements(),
+        productPage.getSize(),
+        productPage.isFirst(),
+        productPage.isLast()
+);
     }
 
 }

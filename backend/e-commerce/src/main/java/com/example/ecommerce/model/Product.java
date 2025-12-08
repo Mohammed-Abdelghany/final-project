@@ -26,12 +26,9 @@ public class Product {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;
-@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-@JoinColumn(name = "product_id")
-    private List<Media> images= new ArrayList<>();
-@ManyToOne(fetch = FetchType.LAZY, optional = false)
-@JoinColumn(name = "user_id", nullable = false)
-private User user;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
 
 }

@@ -14,12 +14,12 @@ export class CategoryComponent implements OnInit {
   }
 
   ngOnInit(): void {
-      this.getAllCategories();
+      this.getAllCategories(1, 10);
   }
 
 
-  getAllCategories(){
-    this.categoryService.getCategories().subscribe(
+  getAllCategories(page: number, size: number){
+    this.categoryService.getCategories(page,size).subscribe(
       result => this.categories = result
     );
   }

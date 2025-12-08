@@ -1,10 +1,14 @@
 package com.example.ecommerce.service.imp;
 
 import com.example.ecommerce.dto.CategoryDto;
+import com.example.ecommerce.helper.Pagination;
 import com.example.ecommerce.mapper.CategoryMapper;
+import com.example.ecommerce.model.Category;
 import com.example.ecommerce.repo.CategoryRepo;
 import com.example.ecommerce.service.CategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -24,8 +28,10 @@ public class CategoryServiceImp implements CategoryService {
         this.categoryMapper = categoryMapper;
     }
 
-    public List<CategoryDto> findAll() {
-        return categoryMapper.toCategoryDtoList( categoryRepo.findAll());
+    public Page<CategoryDto> findAll(int page, int size) {
+        Page<Category> categories = categoryRepo.findAll(Pagination.getPageRequest(page, size));
+
+        return categories.map(categoryMapper::toCategoryDto);
     }
 
     public CategoryDto findById(Long id) {
@@ -56,7 +62,9 @@ public class CategoryServiceImp implements CategoryService {
     }
 
     public List<CategoryDto> findAllActiveCategories() {
-        List<CategoryDto> allCategories = findAll();
+        List<CategoryDto> allCategories = categoryRepo.findAll().stream()
+                .map(categoryMapper::toCategoryDto)
+                .toList();
         return allCategories.stream()
                 .filter(categoryDto -> categoryDto.getFlag() != null && !categoryDto.getFlag())
                 .toList();

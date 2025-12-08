@@ -19,12 +19,12 @@ public class AuthController {
     public AuthController(AuthService authService) {
         this.authService = authService;
     }
-    @PostMapping
+    @PostMapping("/login")
     public LoginRes login(@Valid @RequestBody LoginReq loginReq) {
         return authService.login(loginReq);
     }
 
-    @PostMapping("/register")
+    @PostMapping("/sign-up")
     public UserDto register(@Valid @RequestBody RegisterReq registerReq) {
         return authService.register(registerReq);
     }

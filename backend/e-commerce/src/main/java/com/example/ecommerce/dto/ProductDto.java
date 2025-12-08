@@ -30,5 +30,5 @@ public class ProductDto {
 
     private BigDecimal price;
     private CategoryDto categoryDto;
-    private List<MediaDto> images= new ArrayList<>(); ;
+//    private List<MediaDto> images= new ArrayList<>(); ;
 }

@@ -10,31 +10,33 @@ import {Product} from "../model/product";
 })
 export class ProductService {
 
-  baseUrl = 'http://localhost:9090/products';
+  baseUrl:string = 'http://localhost:9090/products';
   constructor(private http: HttpClient) { }
 
-  getProducts(): Observable<Product[]> {
-    return this.http.get<Product[]>(this.baseUrl ).pipe(
-      map(
-        response => response
-      )
+  getProducts(page: number, size: number): Observable<any> {
+
+    return this.http.get<any>(`${this.baseUrl}/${page}/${size}`);
+  }
+
+
+  getProductsByCategoryId(id: string, page: number, size: number): Observable<any> {
+if (page<1){
+      page=1;
+}
+    const url = `${this.baseUrl}/category/${id}?page=${page}&size=${size}`;
+
+
+    return this.http.get<any>(url, ).pipe(
+      map(response => response)
     );
   }
 
-  getProductsByCategoryId(id): Observable<Product[]> {
-    return this.http.get<Product[]>(this.baseUrl + '/searchByCategoryId/' + id).pipe(
-      map(
-        response => response
-      )
-    );
-  }
 
-  search(key): Observable<Product[]> {
-    return this.http.get<Product[]>(this.baseUrl + '/search?keyword=' + key).pipe(
-      map(
-        response => response
-      )
-    );
+  search(key:string,page:number, size:number): Observable<any> {
+    const url = `${this.baseUrl}/by-name-or-description/${key}`;
+    const params = { page: page.toString(), size: size.toString() };
+
+    return this.http.get<any>(url, { params });
   }
 
 }

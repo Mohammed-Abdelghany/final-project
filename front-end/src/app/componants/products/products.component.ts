@@ -10,43 +10,128 @@ import {ActivatedRoute, RouterLink} from "@angular/router";
 })
 export class ProductsComponent implements OnInit {
 
-  products: Product[] = [  ];
+  products: Product[] = [];
+  messageAr: string = "";
+  messageEn: string = "";
+
+  page: number = 1;
+  pageSize: number = 10;
+  collectionSize: number = 0;
+
+  isLoading: boolean = false; // ← أضف السطر ده
+
   constructor(private productService: ProductService, private activatedRoute: ActivatedRoute) {
   }
+
   ngOnInit(): void {
-    const idExist = this.activatedRoute.snapshot.paramMap.has('id');
-    const keyExist = this.activatedRoute.snapshot.paramMap.has('key');
+    this.activatedRoute.paramMap.subscribe(
+      () => this.loadProducts()
+    )
+  }
+
+  loadProducts(){
+    let idExist = this.activatedRoute.snapshot.paramMap.has("id");
+    let keyExist = this.activatedRoute.snapshot.paramMap.has("key");
     if (idExist) {
-      const idCategory = this.activatedRoute.snapshot.paramMap.get('id');
+      let idCategory = this.activatedRoute.snapshot.paramMap.get("id");
       this.getProductsByCategoryId(idCategory);
     } else if (keyExist) {
-      const key = this.activatedRoute.snapshot.paramMap.get('key');
+      let key = this.activatedRoute.snapshot.paramMap.get("key");
       this.search(key);
     } else {
       this.getAllProducts();
     }
   }
 
-  // tslint:disable-next-line:typedef
   getAllProducts() {
-    this.productService.getProducts().subscribe(
-      result => {
-        console.log('Products arrived:', result); // ✅ هنا هتشوفهم في console
-        this.products = result;
+    this.isLoading = true;
+
+    this.productService.getProducts(this.page, this.pageSize).subscribe({
+      next: (result) => {
+        console.log("✅ Full Response:", result); // شوف الـ response كامل
+        console.log("✅ Products:", result.products);
+        console.log("✅ Total Items:", result.totalItems);
+
+        this.products = result.content;
+        this.collectionSize = result.totalPages;
+        this.clearMessages();
+        this.isLoading = false;
       },
-      error => console.error('Error fetching products', error) // لو فيه مشكلة
-    );
+      error: (errorResponse) => {
+        console.error("❌ Full Error:", errorResponse);
+        console.error("❌ Status:", errorResponse.status);
+        console.error("❌ Error Body:", errorResponse.error);
+
+        this.products = [];
+        this.messageAr = "حدث خطأ في جلب المنتجات";
+        this.messageEn = "Failed to load products";
+        this.isLoading = false;
+      }
+    });
   }
-  // tslint:disable-next-line:typedef
-  getProductsByCategoryId(id){
-    this.productService.getProductsByCategoryId(id).subscribe(
-      result => this.products = result
-    );
+  getProductsByCategoryId(id: string | null) {
+
+    if (!id) return;
+
+    this.isLoading = true;
+
+    this.productService.getProductsByCategoryId(id, this.page, this.pageSize).subscribe({
+      next: (result) => {
+        // result.content هو Array
+        this.products = result.content || [];
+        this.collectionSize = result.totalItems || 0;
+
+        this.clearMessages();
+        this.isLoading = false;
+      },
+      error: (errorResponse) => {
+        this.products = [];
+        this.collectionSize = 0;
+        this.messageAr = errorResponse.error?.bundleMessage?.message_ar || "حدث خطأ";
+        this.messageEn = errorResponse.error?.bundleMessage?.message_en || "Something went wrong";
+        this.isLoading = false;
+      }
+    });
   }
-  // tslint:disable-next-line:typedef
-  search(key){
-    this.productService.search(key).subscribe(
-      result => this.products = result
-    );
+
+
+
+  search(key: string | null) {
+    this.isLoading = true;
+
+    this.productService.search(key, this.page , this.pageSize).subscribe({
+      next: (result) => {
+        this.products = result.content;
+        this.collectionSize = result.totalPages;
+        this.clearMessages();
+        this.isLoading = false;
+      },
+      error: (errorResponse) => {
+        this.products = [];
+        this.messageAr = errorResponse.error?.bundleMessage?.message_ar || "حدث خطأ في البحث";
+        this.messageEn = errorResponse.error?.bundleMessage?.message_en || "Search failed";
+        this.isLoading = false;
+      }
+    });
+  }
+
+  doPagination() {
+    this.loadProducts();
+  }
+
+  changePageSize(event: Event) {
+    this.pageSize = +(<HTMLInputElement>event.target).value;
+    this.page = 1; // نرجع للصفحة الأولى
+    this.loadProducts();
+  }
+
+  addToCart(product: Product) {
+    // TODO: Implement add to cart logic
+    console.log('Added to cart:', product);
+  }
+
+  private clearMessages() {
+    this.messageAr = "";
+    this.messageEn = "";
   }
 }

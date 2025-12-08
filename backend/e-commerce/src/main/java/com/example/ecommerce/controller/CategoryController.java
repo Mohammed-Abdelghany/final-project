@@ -1,10 +1,12 @@
 package com.example.ecommerce.controller;
 
 
+import com.example.ecommerce.controller.vm.PageResponse;
 import com.example.ecommerce.dto.CategoryDto;
 import com.example.ecommerce.service.CategoryService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,10 +22,18 @@ public class CategoryController {
     public CategoryController(CategoryService categoryService) {
         this.categoryService = categoryService;
     }
-    @GetMapping
-
-    public List<CategoryDto> getAllCategories() {
-        return categoryService.findAll();
+    @GetMapping("/{page}/{size}")
+    public PageResponse<CategoryDto> getAllCategories(@PathVariable int page, @PathVariable int size) {
+        Page <CategoryDto> categoriesPage  =categoryService.findAll(page, size);
+        return new PageResponse<>(
+                categoriesPage.getContent(),
+                categoriesPage.getNumber(),
+                categoriesPage.getTotalPages(),
+                categoriesPage.getTotalElements(),
+                categoriesPage.getSize(),
+                categoriesPage.isFirst(),
+                categoriesPage.isLast()
+        );
 
     }
     @GetMapping("/{id}")
