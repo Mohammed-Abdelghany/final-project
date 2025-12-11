@@ -61,6 +61,6 @@ public class AuthFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String uri = request.getRequestURI();
-        return uri.startsWith("/auth");
+        return uri.startsWith("/auth")|| uri.startsWith("/v3/api-docs") || uri.startsWith("/swagger-ui");
     }
 }
