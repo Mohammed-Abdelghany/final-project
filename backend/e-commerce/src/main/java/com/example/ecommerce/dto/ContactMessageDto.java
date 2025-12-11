@@ -14,14 +14,11 @@ import lombok.Setter;
 @NoArgsConstructor
 public class ContactMessageDto {
 
-    private long id;
-    @NotBlank(message = "name.is.required")
-    private String name;
-        @Email(message = "email.is.invalid")
-    private String email;
-        @NotBlank(message = "subject.is.required")
+    private Long id;
+ @NotBlank(message = "subject.is.required")
     private String subject;
+    @NotBlank(message = "message.is.required")
+
     private String message;
-    private String createdAt;
     private  UserDto userDto;
 }

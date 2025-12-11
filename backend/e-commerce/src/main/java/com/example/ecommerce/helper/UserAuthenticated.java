@@ -13,7 +13,10 @@ public class UserAuthenticated {
                 .filter(Authentication::isAuthenticated)
                 .map(Authentication::getPrincipal)
                 .filter(UserDto.class::isInstance)
+
                 .map(UserDto.class::cast)
                 .orElseThrow(() -> new RuntimeException("user.notfound"));
     }
 }
+
+

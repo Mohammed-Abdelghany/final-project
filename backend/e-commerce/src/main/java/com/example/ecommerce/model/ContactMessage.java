@@ -17,13 +17,13 @@ import java.time.LocalDateTime;
 public class ContactMessage {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private long id;
+    private Long id;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(nullable = false, name = "user_id")
     private User user;
     @Column(nullable = false)
     private String subject;
-    @Column(columnDefinition = "TEXT")
+    @Column(length = 2000)
     private String message;
     @CreationTimestamp
     private LocalDateTime createdAt;

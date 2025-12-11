@@ -27,6 +27,5 @@ public class UserDto {
     private String tweLink;
     private String instLink;
     private List<Role> roles;
-    @JsonIgnore
     private List<ContactMessageDto> contactMessages;
 }

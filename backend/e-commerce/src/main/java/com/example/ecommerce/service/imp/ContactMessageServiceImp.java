@@ -2,6 +2,7 @@ package com.example.ecommerce.service.imp;
 
 import com.example.ecommerce.dto.ContactMessageDto;
 import com.example.ecommerce.dto.UserDto;
+import com.example.ecommerce.helper.Pagination;
 import com.example.ecommerce.helper.UserAuthenticated;
 import com.example.ecommerce.mapper.ContactMessageMapper;
 import com.example.ecommerce.mapper.UserMapper;
@@ -11,30 +12,32 @@ import com.example.ecommerce.repo.ContactMessageRepo;
 import com.example.ecommerce.repo.UserRepo;
 import com.example.ecommerce.service.ContactMessageService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 @Service
 public class ContactMessageServiceImp implements ContactMessageService {
-    private final ContactMessageService contactMessageService;
     private final ContactMessageMapper contactMessageMapper;
     private final ContactMessageRepo contactMessageRepo;
-   private final UserMapper userMapper;
     private final UserRepo userRepo;
+    private final UserMapper userMapper ;
 
     @Autowired
-    public ContactMessageServiceImp(ContactMessageService contactMessageService, ContactMessageMapper contactMessageMapper, ContactMessageRepo contactMessageRepo, UserMapper userMapper, UserRepo userRepo) {
-        this.contactMessageService = contactMessageService;
+    public ContactMessageServiceImp( ContactMessageMapper contactMessageMapper, ContactMessageRepo contactMessageRepo, UserMapper userMapper, UserRepo userRepo) {
         this.contactMessageMapper = contactMessageMapper;
         this.contactMessageRepo = contactMessageRepo;
-        this.userMapper = userMapper;
         this.userRepo = userRepo;
+        this.userMapper = userMapper;
     }
     @Override
+    @Transactional
     public ResponseEntity<Void> saveMessage(ContactMessageDto contactMessageDto) {
         UserDto userDto = UserAuthenticated.getUserDtoAuthenticated();
         ContactMessage contactMessage = contactMessageMapper.toContactMessage(contactMessageDto);
@@ -47,7 +50,16 @@ public class ContactMessageServiceImp implements ContactMessageService {
 
 
     @Override
-    public List<ContactMessageDto> getMessages() {
-        return List.of();
+    public Page<ContactMessageDto> getMessages(int page, int size) {
+       Page<ContactMessage> contactMessages = contactMessageRepo.findAllWithUser(Pagination.getPageRequest(page, size));
+       contactMessages.forEach(contactMessage -> {
+              User user = contactMessage.getUser();
+              if (user != null) {
+                contactMessage.setUser(user);
+              }
+       });
+         return contactMessages.map(contactMessageMapper::toContactMessageDto);
+
     }
 }
+
