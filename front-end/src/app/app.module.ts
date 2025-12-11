@@ -18,6 +18,7 @@ import {AuthGuard} from "../service/guard/auth.guard";
 import {GuestGuard} from "../service/guard/guest.guard";
 import {AuthInterceptor} from "../service/interceptor/auth.interceptor";
 import {NgbPaginationModule} from "@ng-bootstrap/ng-bootstrap";
+import {FormsModule} from "@angular/forms";
 
 // http://localhost:4200/
 export const routes: Routes = [
@@ -58,7 +59,8 @@ export const routes: Routes = [
     RouterModule.forRoot(routes, {useHash: false}),
     BrowserModule,
     HttpClientModule,
-    NgbPaginationModule
+    NgbPaginationModule,
+    FormsModule
   ],
   providers: [
     { provide: APP_BASE_HREF, useValue: '/' },
