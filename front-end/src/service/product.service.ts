@@ -38,5 +38,11 @@ if (page<1){
 
     return this.http.get<any>(url, { params });
   }
+  updateProduct(product:Product):Observable<Product>{
+    return this.http.put<Product>(`${this.baseUrl}/update`,product);
+  }
+
+
+
 
 }

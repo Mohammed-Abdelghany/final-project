@@ -17,7 +17,6 @@ export class ChefService {
       .pipe(
         map(response => {
           const data = response.content ? response.content : response;
-          debugger
 
           return data.map((item: any) => ({
             fullName: item.name || '',

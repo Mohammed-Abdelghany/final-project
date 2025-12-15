@@ -16,7 +16,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/products")
-@PreAuthorize("hasAllRoles('ADMIN','Chef','User')")
 public class ProductController {
     private final ProductService productService;
     @Autowired
@@ -47,6 +46,8 @@ public class ProductController {
     ) {
         return productService.saveProducts(productsDto);
     }
+    @PreAuthorize("hasRole('ADMIN')")
+
     @PutMapping("/list")
     public List<ProductDto> updateProducts(@Valid @RequestBody List<ProductDto> productsDto) {
         return productService.updateProducts(productsDto);
@@ -54,6 +55,8 @@ public class ProductController {
 
 //    @PostMapping( consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasRole('ADMIN')")
+
     @PostMapping
     public ProductDto createProduct(@RequestPart("product") ProductDto productDto){
         return productService.createProduct(productDto);
@@ -74,12 +77,14 @@ public class ProductController {
             );
 
     }
+    @PreAuthorize("hasRole('ADMIN')")
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void>delete(@Valid @PathVariable Long id){
         productService.deleteProduct(id);
         return ResponseEntity.noContent().build();
     }
+    @PreAuthorize("hasRole('ADMIN')")
 
     @DeleteMapping("/list")
     public ResponseEntity<Void> deleteProducts(@Valid @RequestBody List<Long> ids){
@@ -100,5 +105,9 @@ return new PageResponse<>(
         productPage.isLast()
 );
     }
-
+    @PreAuthorize("hasRole('ADMIN')")
+@PutMapping("/update")
+    public ProductDto updateProduct(@Valid @RequestBody ProductDto productDto){
+        return productService.updateProduct(productDto);
+    }
 }

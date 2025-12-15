@@ -3,45 +3,63 @@
 
     <!-- Loading Spinner -->
     <div *ngIf="isLoading" class="text-center p-5">
-      <div class="spinner-border text-primary" role="status">
-        <span class="visually-hidden">جاري التحميل...</span>
+      <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+        <span class="visually-hidden">Loading........</span>
       </div>
+      <p class="mt-3 text-muted">Products are loading..........</p>
     </div>
 
     <!-- Products Grid -->
     <div *ngIf="!isLoading && products.length > 0" class="row g-4">
 
       <div *ngFor="let pro of products" class="col-lg-6">
-        <div class="d-flex align-items-center">
-          <img
+        <div class="product-card">
+          <div class="product-image-wrapper">
+            <img
+              class="product-image"
+              [src]="pro.imagePath
+         ? '/assets/img/' + pro.imagePath
+         : '/assets/img/sweets/basbousa.jpg'"
+              [alt]="pro.name"
+              (error)="onImageError($event)"
+            >
+            <div class="product-badge" *ngIf="pro.isNew">جديد</div>
+          </div>
 
-            class="flex-shrink-0 img-fluid rounded"
-            [src]="pro.imagePath
-       ? '/assets/img/' + pro.imagePath
-       : '/assets/img/sweets/basbousa.jpg'"
-            [alt]="pro.name"
-            style="width: 80px; height: 80px; object-fit: cover;"
-            (error)="onImageError($event)"
-          >
+          <div class="product-details">
+            <div class="product-header">
+              <h5 class="product-name">{{pro.name}}</h5>
+              <span class="product-price">${{pro.price | number:'1.2-2'}}</span>
+            </div>
+            <p class="product-description">{{pro.description}}</p>
 
-          <div class="w-100 d-flex flex-column text-start ps-4">
-            <h5 class="d-flex justify-content-between border-bottom pb-2">
-              <span>{{pro.name}}</span>
-              <span class="text-primary">${{pro.price | number:'1.2-2'}}</span>
-            </h5>
-            <small class="fst-italic">{{pro.description}}</small>
+            <!-- زر إضافة للسلة -->
             <button
               type="button"
-              class="btn btn-danger col-lg-6 mt-2"
+              class="btn btn-add-cart"
               (click)="addToCart(pro)"
             >
+              <i class="bi bi-cart-plus me-2"></i>
               إضافة للسلة
             </button>
+
+            <!-- أزرار Update و Delete للادمين -->
+            <div *ngIf="isAdmin" class="admin-actions">
+              <button class="btn btn-update" (click)="openUpdateModal(pro)">
+                <i class="bi bi-pencil-square me-1"></i>
+                تعديل
+              </button>
+              <button class="btn btn-delete" (click)="deleteProduct(pro)">
+                <i class="bi bi-trash3 me-1"></i>
+                حذف
+              </button>
+            </div>
           </div>
         </div>
       </div>
-            <!-- Pagination Section -->
-      <div class="col-12 d-flex justify-content-center align-items-center flex-wrap gap-3 mt-4">
+
+      <!-- Pagination Section -->
+      <div class="col-12 pagination-wrapper">
         <ngb-pagination
           [(page)]="page"
           [pageSize]="pageSize"
@@ -49,15 +67,18 @@
           (pageChange)="doPagination()"
           [maxSize]="5"
           [boundaryLinks]="true"
+          class="custom-pagination"
         >
         </ngb-pagination>
 
-        <div class="d-flex align-items-center gap-2">
-          <label for="pageSize" class="mb-0">حجم الصفحة:</label>
+        <div class="page-size-selector">
+          <label for="pageSize" class="page-size-label">
+            <i class="bi bi-grid-3x3-gap me-2"></i>
+            حجم الصفحة:
+          </label>
           <select
             id="pageSize"
-            class="form-select form-select-sm"
-            style="width: auto;"
+            class="form-select page-size-select"
             [value]="pageSize"
             (change)="changePageSize($event)"
           >
@@ -72,24 +93,424 @@
     </div>
 
     <!-- Error Messages -->
-    <div *ngIf="!isLoading && messageAr && messageEn" class="card border-danger mt-4">
-      <div class="card-body">
-        <div class="alert alert-danger mb-3" dir="rtl">
-          <i class="bi bi-exclamation-triangle-fill me-2"></i>
-          {{messageAr}}
+    <div *ngIf="!isLoading && messageAr && messageEn" class="error-container">
+      <div class="error-card">
+        <div class="error-icon">
+          <i class="bi bi-exclamation-triangle-fill"></i>
         </div>
-        <div class="alert alert-danger mb-0" dir="ltr">
-          <i class="bi bi-exclamation-triangle-fill me-2"></i>
-          {{messageEn}}
+        <div class="error-content">
+          <div class="error-message-ar" dir="rtl">
+            {{messageAr}}
+          </div>
+          <div class="error-message-en" dir="ltr">
+            {{messageEn}}
+          </div>
         </div>
       </div>
     </div>
 
     <!-- Empty State -->
-    <div *ngIf="!isLoading && products.length === 0 && !messageAr" class="text-center p-5">
-      <i class="bi bi-inbox" style="font-size: 3rem; color: #ccc;"></i>
-      <h5 class="mt-3 text-muted">لا توجد منتجات</h5>
+    <div *ngIf="!isLoading && products.length === 0 && !messageAr" class="empty-state">
+      <div class="empty-icon">
+        <i class="bi bi-inbox"></i>
+      </div>
+      <h4 class="empty-title">لا توجد منتجات</h4>
+      <p class="empty-subtitle">لم يتم العثور على أي منتجات في هذه الفئة</p>
     </div>
 
   </div>
+  <!-- مودال التعديل -->
+  <div *ngIf="showUpdateModal" class="modal-backdrop">
+    <div class="modal-content p-4 rounded shadow bg-white">
+      <h2 class="mb-3">تعديل المنتج</h2>
+
+      <input type="text" class="form-control mb-2" placeholder="اسم المنتج" [(ngModel)]="selectedProduct.name">
+      <textarea class="form-control mb-2" placeholder="الوصف" [(ngModel)]="selectedProduct.description"></textarea>
+      <input type="number" class="form-control mb-3" placeholder="السعر" [(ngModel)]="selectedProduct.price">
+
+      <div class="d-flex gap-2">
+        <button class="btn btn-success" (click)="confirmUpdate()">حفظ</button>
+        <button class="btn btn-secondary" (click)="closeUpdateModal()">إلغاء</button>
+      </div>
+    </div>
+  </div>
+
 </div>
+
+<style>
+  /* Product Card Styles */
+  .product-card {
+    display: flex;
+    background: #ffffff;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid #f0f0f0;
+    height: 100%;
+  }
+
+  .product-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    border-color: #FEA116;
+  }
+
+  .product-image-wrapper {
+    position: relative;
+    flex-shrink: 0;
+    width: 140px;
+    height: 140px;
+    overflow: hidden;
+  }
+
+  .product-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+  }
+
+  .product-card:hover .product-image {
+    transform: scale(1.1);
+  }
+
+  .product-badge {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: linear-gradient(135deg, #FEA116 0%, #ff8800 100%);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(254, 161, 22, 0.4);
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+  }
+
+  .product-details {
+    flex: 1;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .product-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #f8f8f8;
+  }
+
+  .product-name {
+    font-size: 18px;
+    font-weight: 700;
+    color: #2d3748;
+    margin: 0;
+    line-height: 1.4;
+  }
+
+  .product-price {
+    font-size: 22px;
+    font-weight: 800;
+    color: #FEA116;
+    white-space: nowrap;
+    text-shadow: 0 1px 2px rgba(254, 161, 22, 0.2);
+  }
+
+  .product-description {
+    font-size: 14px;
+    color: #718096;
+    font-style: italic;
+    margin: 0;
+    line-height: 1.6;
+    flex: 1;
+  }
+
+  /* Button Styles */
+  .btn-add-cart {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 15px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+    width: 100%;
+  }
+
+  .btn-add-cart:hover {
+    background: linear-gradient(135deg, #c82333 0%, #bd2130 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(220, 53, 69, 0.4);
+  }
+
+  .btn-add-cart:active {
+    transform: translateY(0);
+  }
+
+  .admin-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 8px;
+  }
+
+  .btn-update,
+  .btn-delete {
+    flex: 1;
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 14px;
+    border: none;
+    transition: all 0.3s ease;
+  }
+
+  .btn-update {
+    background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
+    color: #000;
+    box-shadow: 0 2px 8px rgba(255, 193, 7, 0.3);
+  }
+
+  .btn-update:hover {
+    background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 193, 7, 0.4);
+  }
+
+  .btn-delete {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    color: white;
+    box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);
+  }
+
+  .btn-delete:hover {
+    background: linear-gradient(135deg, #c82333 0%, #bd2130 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.4);
+  }
+
+  /* Pagination Styles */
+  .pagination-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 24px;
+    margin-top: 40px;
+    padding: 24px;
+    background: #f8f9fa;
+    border-radius: 12px;
+  }
+
+  .custom-pagination ::ng-deep .page-link {
+    border-radius: 8px;
+    margin: 0 4px;
+    border: 1px solid #dee2e6;
+    color: #495057;
+    font-weight: 500;
+    transition: all 0.3s ease;
+  }
+
+  .custom-pagination ::ng-deep .page-link:hover {
+    background-color: #FEA116;
+    border-color: #FEA116;
+    color: white;
+    transform: translateY(-2px);
+  }
+
+  .custom-pagination ::ng-deep .page-item.active .page-link {
+    background-color: #FEA116;
+    border-color: #FEA116;
+    box-shadow: 0 4px 12px rgba(254, 161, 22, 0.3);
+  }
+
+  .page-size-selector {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: white;
+    padding: 12px 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  }
+
+  .page-size-label {
+    margin: 0;
+    font-weight: 600;
+    color: #495057;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+  }
+
+  .page-size-select {
+    width: 80px;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+  }
+
+  .page-size-select:focus {
+    border-color: #FEA116;
+    box-shadow: 0 0 0 3px rgba(254, 161, 22, 0.1);
+  }
+
+  /* Error Styles */
+  .error-container {
+    margin-top: 32px;
+  }
+
+  .error-card {
+    background: linear-gradient(135deg, #fff5f5 0%, #ffe5e5 100%);
+    border: 2px solid #f5c6cb;
+    border-radius: 16px;
+    padding: 32px;
+    display: flex;
+    gap: 24px;
+    align-items: center;
+    box-shadow: 0 4px 16px rgba(220, 53, 69, 0.1);
+  }
+
+  .error-icon {
+    flex-shrink: 0;
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 28px;
+    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+  }
+
+  .error-content {
+    flex: 1;
+  }
+
+  .error-message-ar,
+  .error-message-en {
+    padding: 12px 20px;
+    background: white;
+    border-radius: 10px;
+    margin-bottom: 12px;
+    color: #721c24;
+    font-weight: 500;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  }
+
+  .error-message-ar:last-child,
+  .error-message-en:last-child {
+    margin-bottom: 0;
+  }
+
+  /* Empty State */
+  .empty-state {
+    text-align: center;
+    padding: 80px 20px;
+  }
+
+  .empty-icon {
+    font-size: 80px;
+    color: #cbd5e0;
+    margin-bottom: 24px;
+    animation: float 3s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+
+  .empty-title {
+    color: #2d3748;
+    font-weight: 700;
+    font-size: 24px;
+    margin-bottom: 12px;
+  }
+
+  .empty-subtitle {
+    color: #718096;
+    font-size: 16px;
+    margin: 0;
+  }
+
+  /* Responsive Design */
+  @media (max-width: 991px) {
+    .product-card {
+      flex-direction: column;
+    }
+
+    .product-image-wrapper {
+      width: 100%;
+      height: 200px;
+    }
+
+    .product-header {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .product-price {
+      font-size: 20px;
+    }
+  }
+
+  @media (max-width: 575px) {
+    .pagination-wrapper {
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .admin-actions {
+      flex-direction: column;
+    }
+
+    .error-card {
+      flex-direction: column;
+      text-align: center;
+    }
+  }
+
+  /* Loading Animation Enhancement */
+  .spinner-border {
+    animation: spinner-border 0.75s linear infinite, pulse-shadow 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse-shadow {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(13, 110, 253, 0.4); }
+    50% { box-shadow: 0 0 20px 10px rgba(13, 110, 253, 0); }
+  }
+  .modal-backdrop {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1050;
+  }
+
+  .modal-content {
+    background: white;
+    width: 400px;
+    max-width: 90%;
+    border-radius: 10px;
+  }
+
+</style>

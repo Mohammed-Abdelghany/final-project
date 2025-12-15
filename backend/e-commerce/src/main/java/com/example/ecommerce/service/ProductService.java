@@ -11,6 +11,8 @@ import java.util.List;
 public interface ProductService {
     Page<ProductDto> getProducts(int size, int page);
     ProductDto getProduct(Long id);
+    ProductDto updateProduct(ProductDto productDto);
+
     List<ProductDto> saveProducts(List<ProductDto> productsDto);
     List<ProductDto> updateProducts(List<ProductDto> productsDto);
     ProductDto createProduct(ProductDto productDto);

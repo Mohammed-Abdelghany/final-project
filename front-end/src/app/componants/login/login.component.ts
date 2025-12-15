@@ -29,9 +29,10 @@ export class LoginComponent implements OnInit {
     // call api signup
     this.authService.login(userName, password).subscribe(
       response => {
+        debugger
         sessionStorage.setItem("token", response.token);
-        sessionStorage.setItem("username", response.username);
-        sessionStorage.setItem("userRoles", response.userRoles);
+        sessionStorage.setItem("username", response.user.username);
+        sessionStorage.setItem("userRoles",response.user.roles[0]["code"]);
         this.router.navigateByUrl("/products");
       }, errorResponse => {
         this.messageAr = errorResponse.error.bundleMessage.message_ar;

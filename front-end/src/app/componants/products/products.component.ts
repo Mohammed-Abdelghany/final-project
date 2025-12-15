@@ -2,6 +2,7 @@ import {Component, OnInit} from '@angular/core';
 import {Product} from "../../../model/product";
 import {ProductService} from "../../../service/product.service";
 import {ActivatedRoute, RouterLink} from "@angular/router";
+import {CartService} from "../../../service/cart.service";
 
 @Component({
   selector: 'app-products',
@@ -9,24 +10,51 @@ import {ActivatedRoute, RouterLink} from "@angular/router";
   styleUrls: ['./products.component.css']
 })
 export class ProductsComponent implements OnInit {
-
+  isAdmin: boolean = false;
   products: Product[] = [];
   messageAr: string = "";
   messageEn: string = "";
+  selectedProduct: Product | null = null;
+  showUpdateModal: boolean = false;
 
   page: number = 1;
   pageSize: number = 10;
   collectionSize: number = 0;
 
   isLoading: boolean = false; // ← أضف السطر ده
-
-  constructor(private productService: ProductService, private activatedRoute: ActivatedRoute) {
+cartService:CartService;
+  constructor(private productService: ProductService, private activatedRoute: ActivatedRoute,cartService:CartService) {
+    this.cartService=cartService;
   }
 
   ngOnInit(): void {
     this.activatedRoute.paramMap.subscribe(
       () => this.loadProducts()
     )
+    const rolesString = sessionStorage.getItem("userRoles");
+    if (rolesString) {
+      this.isAdmin = rolesString.includes("ADMIN");
+    }
+  }
+  openUpdateModal(product: Product) {
+    // نعمل نسخة من المنتج عشان التعديلات مش تمسح الأصل قبل الحفظ
+    this.selectedProduct = { ...product };
+    this.showUpdateModal = true;
+  }
+  confirmUpdate() {
+    if (!this.selectedProduct) return;
+
+    // نرسل التحديث للـ backend
+    this.updateProduct(this.selectedProduct);
+
+    // نغلق المودال بعد الحفظ
+    this.showUpdateModal = false;
+    this.selectedProduct = null;
+  }
+
+  closeUpdateModal() {
+    this.showUpdateModal = false;
+    this.selectedProduct = null;
   }
 
   loadProducts(){
@@ -125,13 +153,32 @@ export class ProductsComponent implements OnInit {
     this.loadProducts();
   }
 
-  addToCart(product: Product) {
-    // TODO: Implement add to cart logic
-    console.log('Added to cart:', product);
-  }
+
 
   private clearMessages() {
     this.messageAr = "";
     this.messageEn = "";
+  }
+  addToCart(product: Product) {
+    this.cartService.addToCart(product);
+  }
+  updateProduct(product: Product) {
+    this.productService.updateProduct(product).subscribe({
+      next: (updatedProduct) => {
+        // تحديث المنتج في القائمة المحلية
+        const index = this.products.findIndex(p => p.id === updatedProduct.id);
+        if (index !== -1) {
+          this.products[index] = updatedProduct;
+        }
+        this.clearMessages();
+        this.cartService.updateProductPrice(updatedProduct);
+
+      },
+      error: (errorResponse) => {
+        this.messageAr = errorResponse.error?.bundleMessage?.message_ar || "حدث خطأ في التحديث";
+        this.messageEn = errorResponse.error?.bundleMessage?.message_en || "Update failed";
+      }
+    });
+
   }
 }

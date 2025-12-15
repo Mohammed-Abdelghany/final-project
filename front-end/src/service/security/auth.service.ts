@@ -30,6 +30,7 @@ export class AuthService {
 
   isUserLogin(): boolean {
     const token = sessionStorage.getItem("token");
+
     return token && token.trim().length > 0;
   }
 
