@@ -18,7 +18,7 @@ import java.util.List;
 @ControllerAdvice
 
 public class GlobalExceptionHandler {
-    private BundleResourceService bundleResourceService;
+    private final BundleResourceService bundleResourceService;
     @Autowired
     public GlobalExceptionHandler(BundleResourceService bundleResourceService) {
         this.bundleResourceService = bundleResourceService;

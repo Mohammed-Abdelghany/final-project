@@ -11,6 +11,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +20,7 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class ProductDto {
+public class ProductDto implements Serializable {
 
     private Long id;
     @NotBlank(message = "Name is Required")
@@ -28,7 +29,9 @@ public class ProductDto {
     @NotBlank(message = "Description is Required")
     private String description;
 
-    private BigDecimal price;
+    private Double price;
     private CategoryDto categoryDto;
 //    private List<MediaDto> images= new ArrayList<>(); ;
+    private Long stockQuantity;
+
 }

@@ -18,6 +18,7 @@ import com.example.ecommerce.repo.UserRepo;
 import com.example.ecommerce.service.ProductService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -48,7 +49,7 @@ public class ProductServiceImp implements ProductService {
 //        this.fileStorageHelper = fileStorageHelper;
         this.userRepo = userRepo;
     }
-
+    @Cacheable(value = "products", key = "#page + '-' + #size")
     public Page<ProductDto> getProducts(int page, int size) {
         Page<Product> products = productRepo.findAll(Pagination.getPageRequest(page, size));
         return products.map(productMapper::toProductDto);
@@ -102,13 +103,7 @@ public class ProductServiceImp implements ProductService {
     @Transactional
     public List<ProductDto> saveProducts(List<ProductDto> productsDto) {
        UserDto userDto= UserAuthenticated.getUserDtoAuthenticated();
-        boolean isChef = userDto.getRoles().stream()
-                .anyMatch(r -> r.getCode().equals("ROLE_Chef"));
-        if (!isChef) {
-            throw new RuntimeException("user.cannot.create.product");
-        }
-
-        User user = userRepo.findById(userDto.getId())
+               User user = userRepo.findById(userDto.getId())
                 .orElseThrow(() -> new RuntimeException("user.notfound"));
 
         productsDto.forEach(dto -> {
@@ -155,7 +150,7 @@ public class ProductServiceImp implements ProductService {
                 .toList();
         return productMapper.toProductDtoList(productRepo.saveAll(updated));
     }
-
+    @Cacheable(value = "productsCategory", key = "'productsCategory:' + #categoryId + ':' + #page + ':' + #size")
     public Page<ProductDto> getProductsByCategory(Long categoryId,int page , int size) {
         CategoryDto categoryDto = categoryServiceImp.findById(categoryId);
         Page<Product> products = productRepo.findByCategoryId(categoryDto.getId(),Pagination.getPageRequest(page, size));
@@ -185,7 +180,7 @@ public class ProductServiceImp implements ProductService {
         if (dto.getName() == null || dto.getName().isBlank()) {
             throw new RuntimeException("product.name.empty");
         }
-        if (dto.getPrice() == null || dto.getPrice().compareTo(BigDecimal.ZERO) < 0) {
+        if (dto.getPrice() <= 0) {
             throw new RuntimeException("product.price.invalid");
         }
     }

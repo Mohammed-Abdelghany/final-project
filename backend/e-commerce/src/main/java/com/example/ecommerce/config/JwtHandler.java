@@ -28,12 +28,10 @@ public class JwtHandler {
         this.userRepo = userRepo;
         this.userMapper = userMapper;
 
-        // ✅ SecretKey
         this.key = Keys.hmacShaKeyFor(
                 jwtToken.getSecret_Key().getBytes(StandardCharsets.UTF_8)
         );
 
-        // ✅ بناء Parser مرة واحدة
         this.jwtParser = Jwts.parser()
                 .verifyWith(key)
                 .build();
@@ -44,20 +42,19 @@ public class JwtHandler {
         Date expiryDate = Date.from(now.toInstant().plus(jwtToken.getDuration()));
 
         return Jwts.builder()
-                .subject(user.getUsername())       // ✅ بدون set
-                .issuedAt(now)                     // ✅ بدون set
-                .expiration(expiryDate)            // ✅ بدون set
+                .subject(user.getUsername())
+                .issuedAt(now)
+                .expiration(expiryDate)
                 .claim("roles", user.getRoles())
-                .signWith(key)                     // ✅ إضافة signWith
+                .signWith(key)
                 .compact();
     }
 
     public UserDto validateToken(String token) {
         try {
-            // ✅ parseSignedClaims بدلاً من parseClaimsJws
             Claims claims = jwtParser
                     .parseSignedClaims(token)
-                    .getPayload();  // ✅ getPayload بدلاً من getBody
+                    .getPayload();
 
             String username = claims.getSubject();
 

@@ -1,20 +1,21 @@
 package com.example.ecommerce.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import jakarta.validation.constraints.NotBlank;
+import lombok.*;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
-public class OrderDto {
+public class OrderDto implements Serializable {
+
     private Long id;
     private LocalDateTime creationTimestamp;
-    private Double price;
+    private Double totalPrice;
     private Long userId;
-
+    private List<OrderItemDto> items;
 }
