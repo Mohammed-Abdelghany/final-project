@@ -64,7 +64,17 @@
             </tbody>
 
           </table>
-          <button type="button" class="btn btn-success col-12">Take Order</button>
+          <div *ngIf="cartItems.length === 0; else showButton">
+            <h2 class="text-center">Your cart is empty</h2>
+          </div>
+
+          <ng-template #showButton>
+            <button type="button" class="btn btn-success col-12" (click)="checkout()">
+              Take Order
+            </button>
+          </ng-template>
+
+
         </div>
       </div>
     </div>

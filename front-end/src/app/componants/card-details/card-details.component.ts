@@ -45,4 +45,31 @@ export class CardDetailsComponent implements OnInit {
 
 
   }
+  checkout() {
+
+    const payload = {
+      items: this.cartItems.map(i => ({
+        productId: i.id,
+        productName: i.name,
+        productPrice: i.price,
+        quantity: i.quantity,
+        totalPrice: i.price * i.quantity
+      }))
+    };
+      console.log(payload);
+    this.cartDetailsService.checkout(payload).subscribe({
+      next: (res) => {
+        console.log('Order placed successfully', res);
+        alert('Order placed successfully!');
+        this.cartDetailsService.updateCart([]);
+        this.cartService.resetCart();
+
+      },
+      error: (err) => {
+        console.error('Checkout failed', err);
+        alert('Checkout failed. Please try again.');
+      }
+    });
+  }
+
 }

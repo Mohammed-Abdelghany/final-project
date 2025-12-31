@@ -26,4 +26,6 @@ export class CardComponent implements OnInit {
     this.totalSize = this.cartItems.reduce((sum, item) => sum + item.quantity, 0);
     this.totalAmount = this.cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
   }
+
+
 }
