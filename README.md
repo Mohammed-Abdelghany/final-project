@@ -1,132 +1,92 @@
-# E-commerce Full-Stack Application
+# 🛒 Enterprise Full-Stack E-Commerce Platform
 
-## 🛒 Overview
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.x-brightgreen.svg)](https://spring.io/projects/spring-boot)
+[![Angular](https://img.shields.io/badge/Angular-17%2B-DD0031.svg)](https://angular.io/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue.svg)](https://www.postgresql.org/)
+[![Kashier Payment](https://img.shields.io/badge/Payment-Kashier%20Gateway-orange.svg)](https://kashier.io/)
 
-This is a full-stack e-commerce application built with **Spring Boot** (backend), **Angular** (frontend), and **Oracle Database** for persistence. The application allows users to register, login, browse products, manage categories, and submit contact messages. Admins can manage products, categories, and users. It follows modern best practices, including JWT-based authentication, RESTful APIs, and exception handling.
+A high-performance E-Commerce platform built with **Spring Boot 3**, **Angular 17+**, and **PostgreSQL**. Integrated with **Kashier Payment Gateway** for secure checkout using **Clean Architecture** and **DDD** principles.
 
-## ⚡ Features
+---
+## ⚡ Core Features
 
-* User Registration and Authentication (JWT)
-* Role-based Authorization (User/Admin)
-* CRUD Operations for Products and Categories
-* Contact Message Submission
-* Pagination and Filtering for Product Listings
-* Global Exception Handling
-* Swagger/OpenAPI Documentation
-* Angular-based responsive frontend
+### 🔐 Security & Access Control
+* **Stateless JWT:** Secure authentication flow with refresh tokens.
+* **Granular RBAC:** Role-based access for `ADMIN`, `SELLER`, and `CUSTOMER`.
+* **Protection:** BCrypt hashing and API rate-limiting against brute force.
 
-## 🏗️ Technologies Used
+### 📦 Catalog & Performance
+* **Catalog & Search:** Dynamic product management with paginated dynamic filters.
+* **Redis Caching:** L2 caching for high-traffic catalog endpoints.
+* **Database Optimization:** PostgreSQL schema with custom indexing and Liquibase versioning.
 
-**Backend:**
+---
 
-* Java 17+
-* Spring Boot 3.x
-* Spring Security
-* Spring Data JPA
-* Oracle Database
-* JWT Authentication
-* Springdoc OpenAPI / Swagger
-* Maven
+## 🏗️ Tech Stack
 
-**Frontend:**
+| Layer | Technologies |
+| :--- | :--- |
+| **Backend** | Java 17+, Spring Boot 3.x, Spring Data JPA, Spring Security |
+| **Payment** | Kashier Payment API & Webhook Integration |
+| **Database & Cache** | PostgreSQL 16, Redis, Liquibase |
+| **Frontend** | Angular 17+, TypeScript, RxJS, Angular Material |
+| **DevOps & Docs** | Docker, Docker Compose, Swagger UI (OpenAPI 3.0) |
 
-* Angular 16+
-* TypeScript
-* Angular Material / Bootstrap 
-* HttpClient for REST API calls
+---
 
-**Other Tools:**
-* Git & GitHub
-* Postman (API testing)
-* Maven for build management
-
-## 📦 Project Structure
+## 📂 Architecture
 
 ```
-ecommerce/
-├── config/
-│   ├── exception/          # Global exception handler
-│   ├── filters/            # JWT, Auth filters
-│   ├── SecurityConfig.java
-│   └── WebConfig.java
-├── controller/             # REST Controllers
-│   ├── AuthController.java
-│   ├── ProductController.java
-│   ├── CategoryController.java
-│   ├── UserController.java
-│   └── ContactMessageController.java
-├── dto/                    # Data Transfer Objects
-├── helper/                 # Utility classes (JWT token, pagination, file storage)
-├── service/                # Service layer
-└── repository/             # JPA Repositories
+ecommerce-platform/
+├── src/main/java/com/ecommerce/
+│   ├── config/          # Security, Redis & Kashier Configs
+│   ├── controller/      # REST & Webhook API Layer
+│   ├── dto/             # Data Transfer & Payment Payloads
+│   ├── model/           # JPA Entities
+│   ├── repository/      # Spring Data JPA Repositories
+│   └── service/         # Business Logic & Kashier Payment Engine
+└── src/main/resources/  # Migration Scripts & Configs
 ```
 
-## ⚙️ Backend Setup
+---
 
-1. **Clone the repository**
+## ⚙️ Quick Start (Docker)
 
 ```bash
-git clone <https://github.com/Mohammed-Abdelghany/final-project/>
-cd backend
+git clone <your-repository-url>
+cd ecommerce-platform
+docker-compose up -d --build
 ```
 
-2. **Configure Oracle DB**
+Endpoints:
+* **Frontend:** `http://localhost:4200`
+* **Swagger Docs:** `http://localhost:8080/swagger-ui/index.html`
 
-   * Update `application.properties` / `application.yml`:
+---
 
-```properties
-spring.datasource.url=jdbc:oracle:thin:@localhost:1521:XE
-spring.datasource.username=your_username
-spring.datasource.password=your_password
-spring.jpa.hibernate.ddl-auto=update
+## 🛠️ Configuration (`application.yml`)
+
+```yaml
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/ecommerce_db
+    username: postgres
+    password: your_password
+
+kashier:
+  merchant-id: YOUR_MERCHANT_ID
+  api-key: YOUR_KASHIER_API_KEY
+  secret-key: YOUR_KASHIER_SECRET_KEY
+  mode: test
 ```
 
-3. **Build and Run Backend**
+---
 
-```bash
-mvn clean install
-mvn spring-boot:run
-```
+## 🔐 Key API Endpoints
 
-4. **Swagger API Docs**
-
-* Access: `http://localhost:9090/swagger-ui/index.html`
-
-## ⚙️ Frontend Setup
-
-1. **Navigate to frontend directory**
-
-```bash
-cd frontend
-```
-
-2. **Install dependencies**
-
-```bash
-npm install
-```
-
-3. **Run Angular app**
-
-```bash
-ng serve --open
-```
-
-* The app will run on `http://localhost:4200`
-
-## 🔐 Authentication
-
-* JWT-based authentication
-* Roles: `USER` and `Chef.`
-* Protected endpoints configured via Spring Security, JWT
-
-
-
-## 📂 Future Improvements
-
-* Implement payment gateway integration
-* Add product reviews and ratings
-* Add advanced search and filter options
-* Improve frontend UI/UX
-
-
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| `POST` | `/api/v1/auth/login` | Authenticate user & issue JWT |
+| `GET` | `/api/v1/products` | Paginated product search with filters |
+| `POST` | `/api/v1/payments/create-checkout-session` | Initialize Kashier payment |
+| `POST` | `/api/v1/payments/kashier-webhook` | Kashier payment status webhook |
