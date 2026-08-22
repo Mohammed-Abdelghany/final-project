@@ -88,5 +88,3 @@ kashier:
 | :--- | :--- | :--- |
 | `POST` | `/api/v1/auth/login` | Authenticate user & issue JWT |
 | `GET` | `/api/v1/products` | Paginated product search with filters |
-| `POST` | `/api/v1/payments/create-checkout-session` | Initialize Kashier payment |
-| `POST` | `/api/v1/payments/kashier-webhook` | Kashier payment status webhook |
